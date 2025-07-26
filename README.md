@@ -1,82 +1,183 @@
 # Entangld
-# **EntangId Documentation**  
-*A Quantum-Inspired Distributed Qubit Simulation Framework*  
 
----
+# Quantum Qubit System Documentation
 
-## **1. Overview**  
-**EntangId** is a C++ library that simulates quantum computing primitives (qubits, gates, entanglement) using shared memory for distributed coordination. It provides:  
-- **Qubit state management** with complex amplitudes  
-- **Entanglement** between up to 4 nodes  
-- **Automatic decoherence** with timeout-based collapse  
-- **Thread-safe operations** via mutex locks  
+## Overview
 
-**Key Innovation**: Uses POSIX shared memory (`shm_open`, `mmap`) to enable quantum-like behavior across processes/machines.  
+This C++ implementation provides a quantum-inspired qubit system that simulates key quantum computing concepts including superposition, entanglement, measurement, and decoherence. The system uses shared memory for inter-process communication, allowing qubits to be shared across different processes.
 
----
+## Key Features
 
-## **2. Core Components**  
+- Single qubit operations (state manipulation, gates, measurement)
+- Multi-qubit entanglement (Bell states, GHZ states)
+- Measurement propagation between entangled qubits
+- Automatic decoherence over time
+- Shared memory based communication
+- Thread-safe operations
 
-### **2.1 QubitState Structure**  
-```cpp  
-struct QubitState {  
-    double alpha_real, alpha_imag;  // |0> amplitude  
-    double beta_real, beta_imag;    // |1> amplitude  
-    uint8_t measured;               // 0, 1, or 2 (superposition)  
-    char links[4][64];              // Names of entangled peers  
-    uint32_t link_count;            // Active links  
-    uint32_t task_id;               // Owner ID  
-    uint64_t created_at;            // Timestamp (ms)  
-    uint64_t decohere_timeout_ms;   // Auto-collapse deadline  
-};  
-```  
-**Purpose**: Stores the quantum state in shared memory for cross-process access.  
+## Data Structures
 
----
+### `QubitState` Struct
 
-### **2.2 Qubit Class**  
-#### **Key Methods**  
-| Method | Description |  
-|--------|-------------|  
-| `initSuperposition()` | Sets qubit to (|0> + |1>)/√2 |  
-| `measure()` | Collapses state to |0> or |1> (probabilistic) |  
-| `applyGate(gate)` | Applies H/X/Z gate (thread-safe) |  
-| `entangle(peers)` | Links qubits for measurement propagation |  
-| `setState(ar, ai, br, bi)` | Custom amplitudes |  
+Represents the state of a single qubit in shared memory:
 
-#### **Private Mechanisms**  
-- **Shared Memory**: Managed via `shm_open`/`mmap`  
-- **Decoherence Thread**: Periodically checks for timeout-based collapse  
-- **Mutex Locks**: Ensure atomic operations (`std::mutex`)  
+```cpp
+struct QubitState {
+    double alpha_real;        // Real part of |0> coefficient
+    double alpha_imag;        // Imaginary part of |0> coefficient
+    double beta_real;         // Real part of |1> coefficient
+    double beta_imag;         // Imaginary part of |1> coefficient
+    uint8_t measured;         // 0=|0>, 1=|1>, 2=not measured (superposition)
+    char links[4][64];        // Names of up to 4 shared-memory peers
+    uint32_t link_count;      // Number of linked qubits
+    uint32_t task_id;         // Owner task identifier
+    uint64_t created_at;      // Creation timestamp (ms)
+    uint64_t decohere_timeout_ms; // Time until decoherence (ms)
+};
+```
 
----
+## `Qubit` Class
 
-## **3. Entanglement & GHZ States**  
-### **3.1 formGHZGroup(qubits)**  
-Creates a Greenberger-Horne-Zeilinger (GHZ) state among 2–5 qubits:  
-```cpp  
-std::vector<Qubit*> qubits = {&q1, &q2, &q3};  
-formGHZGroup(qubits); // All qubits entangled  
-```  
-**Behavior**:  
-1. Each qubit links to all others (`entangle()`)  
-2. Sets uniform superposition state (`setState()`)  
+### Public Methods
 
-**Measurement Propagation**:  
-- Calling `measure()` on one qubit collapses all entangled peers via `propagateToLinks()`.  
+#### Constructor/Destructor
+```cpp
+Qubit(const std::string &name, uint32_t taskId, uint64_t decohereTimeoutMs = 5000)
+```
+- Creates or opens a shared memory qubit with given name
+- `taskId` identifies the owning process
+- `decohereTimeoutMs` sets time until automatic decoherence (default 5000ms)
 
----
+```cpp
+~Qubit()
+```
+- Cleans up shared memory resources
 
-## **4. Decoherence Model**  
-### **4.1 Timeout-Based Collapse**  
-```cpp  
-Qubit q("qubit", 1, 5000); // 5s timeout  
-q.initSuperposition();  
-```  
-**Rules**:  
-- If `measure()` isn’t called within `decohere_timeout_ms`, the background thread forces a random collapse.  
-- Propagates to linked qubits (simulating quantum decoherence).  
+#### State Operations
+```cpp
+void initSuperposition()
+```
+- Initializes qubit to equal superposition state (|0> + |1>)/√2
 
+```cpp
+uint8_t measure()
+```
+- Measures the qubit, collapsing the state probabilistically
+- Returns 0 (|0>) or 1 (|1>)
+- Propagates measurement to all entangled qubits
+
+```cpp
+void applyGate(char gate)
+```
+- Applies a quantum gate to the qubit:
+  - 'H': Hadamard gate (creates superposition)
+  - 'X': Pauli-X gate (bit flip)
+  - 'Z': Pauli-Z gate (phase flip)
+
+```cpp
+void entangle(const std::vector<std::string>& peers)
+```
+- Entangles this qubit with up to 4 others (by shared memory name)
+
+```cpp
+void setState(double ar, double ai, double br, double bi)
+```
+- Sets custom state amplitudes:
+  - `ar`, `ai`: Real and imaginary parts of |0> coefficient
+  - `br`, `bi`: Real and imaginary parts of |1> coefficient
+
+#### Information
+```cpp
+void printState() const
+```
+- Prints current state information to stdout
+
+```cpp
+bool isMeasured() const
+```
+- Returns true if qubit has been measured (collapsed)
+
+```cpp
+uint8_t getMeasurement() const
+```
+- Returns measurement result (only valid if measured)
+
+```cpp
+const std::string& name() const
+```
+- Returns shared memory name of this qubit
+
+## Utility Functions
+
+```cpp
+void formGHZGroup(std::vector<Qubit*>& qubits)
+```
+- Creates a GHZ (Greenberger-Horne-Zeilinger) entangled state among 2-5 qubits
+- All qubits will be in superposition and fully entangled
+
+## Testing Framework
+
+The implementation includes a comprehensive test suite:
+
+1. **Single Qubit Operations**
+   - State initialization
+   - Gate operations
+   - Measurement statistics
+
+2. **Bell State (2-Qubit Entanglement)**
+   - Entanglement creation
+   - Measurement correlation testing
+
+3. **GHZ State (3-Qubit Entanglement)**
+   - Multi-qubit entanglement
+   - Measurement propagation
+
+4. **Decoherence**
+   - Tests automatic state collapse after timeout
+
+5. **Advanced Entanglement (4-Qubit)**
+   - Larger entangled systems
+   - Complex measurement propagation
+
+## Usage Example
+
+```cpp
+// Create two entangled qubits (Bell state)
+Qubit q1("qubit1", 1234);
+Qubit q2("qubit2", 1234);
+
+q1.setState(1.0, 0.0, 0.0, 0.0); // |0>
+q1.applyGate('H'); // (|0> + |1>)/√2
+q2.setState(1.0, 0.0, 0.0, 0.0); // |0>
+
+// Entangle them
+q1.entangle({"qubit2"});
+q2.entangle({"qubit1"});
+
+// Measure - results will be correlated
+uint8_t result1 = q1.measure();
+uint8_t result2 = q2.measure();
+
+// Print states
+q1.printState();
+q2.printState();
+```
+
+## Implementation Details
+
+- **Thread Safety**: All operations are protected by mutex locks
+- **Shared Memory**: Uses POSIX shared memory (`shm_open`, `mmap`)
+- **Decoherence**: Background thread checks for timeout and collapses state
+- **Measurement Propagation**: Automatically propagates to all linked qubits
+
+## Limitations
+
+- Maximum of 4 entangled qubits per system
+- Shared memory names must be unique system-wide
+- No error recovery for shared memory failures
+- Basic quantum operations only (no arbitrary unitary gates)
+
+This implementation provides a practical simulation of key quantum computing concepts while demonstrating shared memory inter-process communication and thread-safe design.
 ---
 
 ## **5. Use Cases**  
