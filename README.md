@@ -1,6 +1,6 @@
 # Entangld
 
-# Hybrid Qubit System (Quantum + Classic)
+# Hybrid Qubit Computation Methodology (Quantum + Classic)
 
 ## Overview
 
