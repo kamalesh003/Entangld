@@ -230,7 +230,157 @@ if (president.measure() == silo1.getMeasurement()) {
 
 Run tests:  
 ```bash  
-!./qubit_test 
+!./qubit_test
+
+
+===== QUANTUM QUBIT SYSTEM TEST SUITE =====
+Testing all features of the quantum-inspired qubit implementation
+
+===== TEST 1: SINGLE QUBIT OPERATIONS =====
+Qubit 'qubit_single': Collapsed to |0>
+Links: 0
+Decoherence: 5000ms
+
+[Initialized to |0>]
+Qubit 'qubit_single': |ψ> = (1.000+0.000i)|0> + (0.000+0.000i)|1>
+Links: 0
+Decoherence: 5000ms
+
+[Applied Hadamard gate]
+Qubit 'qubit_single': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 0
+Decoherence: 5000ms
+
+Measurement statistics (10000 trials):
+|0>: 4962 (49.620%)
+|1>: 5038 (50.380%)
+
+[Testing gates]
+After X gate: Qubit 'qubit_single': |ψ> = (0.000+0.000i)|0> + (1.000+0.000i)|1>
+Links: 0
+Decoherence: 5000ms
+After Z gate: Qubit 'qubit_single': |ψ> = (0.000+0.000i)|0> + (-1.000+-0.000i)|1>
+Links: 0
+Decoherence: 5000ms
+After H gate: Qubit 'qubit_single': |ψ> = (-0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 0
+Decoherence: 5000ms
+TEST 1 COMPLETE
+
+
+===== TEST 2: BELL STATE (2-QUBIT ENTANGLEMENT) =====
+Initial Bell state prepared:
+Qubit 'bell_qubit1': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 1 bell_qubit2
+Decoherence: 5000ms
+Qubit 'bell_qubit2': |ψ> = (1.000+0.000i)|0> + (0.000+0.000i)|1>
+Links: 1 bell_qubit1
+Decoherence: 5000ms
+
+Correlation statistics (1000 trials):
+Same measurement: 1000 (100.000%)
+Different measurement: 0 (0.000%)
+TEST 2 COMPLETE
+
+
+===== TEST 3: GHZ STATE (3-QUBIT ENTANGLEMENT) =====
+Initial GHZ state prepared:
+Qubit 'ghz_qubit1': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 2 ghz_qubit2 ghz_qubit3
+Decoherence: 5000ms
+Qubit 'ghz_qubit2': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 2 ghz_qubit1 ghz_qubit3
+Decoherence: 5000ms
+Qubit 'ghz_qubit3': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 2 ghz_qubit1 ghz_qubit2
+Decoherence: 5000ms
+
+Correlation statistics (1000 trials):
+All same: 1000 (100.000%)
+Not all same: 0 (0.000%)
+
+Testing measurement propagation:
+Before measurement:
+Qubit 'ghz_qubit1': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 2 ghz_qubit2 ghz_qubit3
+Decoherence: 5000ms
+Qubit 'ghz_qubit2': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 2 ghz_qubit1 ghz_qubit3
+Decoherence: 5000ms
+Qubit 'ghz_qubit3': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 2 ghz_qubit1 ghz_qubit2
+Decoherence: 5000ms
+
+Measuring qubit 1...
+Result: 0
+After measurement:
+Qubit 'ghz_qubit1': Collapsed to |0>
+Links: 2 ghz_qubit2 ghz_qubit3
+Decoherence: 5000ms
+Qubit 'ghz_qubit2': Collapsed to |0>
+Links: 2 ghz_qubit1 ghz_qubit3
+Decoherence: 5000ms
+Qubit 'ghz_qubit3': Collapsed to |0>
+Links: 2 ghz_qubit1 ghz_qubit2
+Decoherence: 5000ms
+SUCCESS: All qubits collapsed to same state
+TEST 3 COMPLETE
+
+
+===== TEST 4: DECOHERENCE =====
+Initial state:
+Qubit 'decoherence_qubit': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 0
+Decoherence: 500ms
+
+Waiting 300ms (should not decohere)...
+Qubit still in superposition (correct)
+
+Waiting 500ms more (should decohere)...
+Qubit collapsed to |1> (correct)
+Qubit 'decoherence_qubit': Collapsed to |1>
+Links: 0
+Decoherence: 500ms
+TEST 4 COMPLETE
+
+
+===== TEST 5: ADVANCED ENTANGLEMENT (4-QUBIT) =====
+4-qubit GHZ state prepared:
+Qubit 'adv_qubit1': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 3 adv_qubit2 adv_qubit3 adv_qubit4
+Decoherence: 5000ms
+Qubit 'adv_qubit2': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 3 adv_qubit1 adv_qubit3 adv_qubit4
+Decoherence: 5000ms
+Qubit 'adv_qubit3': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 3 adv_qubit1 adv_qubit2 adv_qubit4
+Decoherence: 5000ms
+Qubit 'adv_qubit4': |ψ> = (0.707+0.000i)|0> + (0.707+0.000i)|1>
+Links: 3 adv_qubit1 adv_qubit2 adv_qubit3
+Decoherence: 5000ms
+
+Measuring first qubit...
+Result: 1
+All qubits after measurement:
+Qubit 'adv_qubit1': Collapsed to |1>
+Links: 3 adv_qubit2 adv_qubit3 adv_qubit4
+Decoherence: 5000ms
+Qubit 'adv_qubit2': Collapsed to |1>
+Links: 3 adv_qubit1 adv_qubit3 adv_qubit4
+Decoherence: 5000ms
+Qubit 'adv_qubit3': Collapsed to |1>
+Links: 3 adv_qubit1 adv_qubit2 adv_qubit4
+Decoherence: 5000ms
+Qubit 'adv_qubit4': Collapsed to |1>
+Links: 3 adv_qubit1 adv_qubit2 adv_qubit3
+Decoherence: 5000ms
+SUCCESS: All qubits collapsed to same state
+TEST 5 COMPLETE
+
+
+===== ALL TESTS COMPLETED SUCCESSFULLY =====
+
+
 ```  
 
 
