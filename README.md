@@ -1,6 +1,6 @@
 # Entangld
 
-# Quantum Qubit System Documentation
+# Hybrid Qubit System (Quantum + Classic)
 
 ## Overview
 
